@@ -59,6 +59,29 @@ func TestGetHashAsUint64(t *testing.T) {
 		assert.Equal(t, uint64(42), result)
 	})
 
+	t.Run("narrow_integer_types", func(t *testing.T) {
+		tests := []struct {
+			name  string
+			input any
+		}{
+			{"int", int(42)},
+			{"int8", int8(42)},
+			{"int16", int16(42)},
+			{"int32", int32(42)},
+			{"uint", uint(42)},
+			{"uint8", uint8(42)},
+			{"uint16", uint16(42)},
+			{"uint32", uint32(42)},
+		}
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				result, err := getHashAsUint64(tt.input)
+				require.NoError(t, err)
+				assert.Equal(t, uint64(42), result)
+			})
+		}
+	})
+
 	t.Run("bytes_8", func(t *testing.T) {
 		b := make([]byte, 8)
 		binary.BigEndian.PutUint64(b, 12345)
