@@ -210,6 +210,9 @@ func (e *PodEntry) String() string {
 // positional scores (e.g. Redis ZAdd) can iterate the slice and use the index.
 func engineToRequestMapping(engineKeys, requestKeys []BlockHash) map[BlockHash][]BlockHash {
 	mappings := make(map[BlockHash][]BlockHash)
+	if len(engineKeys) == 0 || len(requestKeys) == 0 {
+		return mappings
+	}
 	n := max(len(engineKeys), len(requestKeys))
 	for i := 0; i < n; i++ {
 		ek := engineKeys[i*len(engineKeys)/n]
