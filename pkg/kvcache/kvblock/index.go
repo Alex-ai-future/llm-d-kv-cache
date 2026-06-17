@@ -208,8 +208,9 @@ func (e *PodEntry) String() string {
 // proportional distribution based on the lengths of both slices.
 // Each engine key maps to an ordered slice of request keys; callers that need
 // positional scores (e.g. Redis ZAdd) can iterate the slice and use the index.
+// Returns an empty map if either slice is empty.
 func engineToRequestMapping(engineKeys, requestKeys []BlockHash) map[BlockHash][]BlockHash {
-	mappings := make(map[BlockHash][]BlockHash)
+	mappings := make(map[BlockHash][]BlockHash, len(engineKeys))
 	if len(engineKeys) == 0 || len(requestKeys) == 0 {
 		return mappings
 	}
