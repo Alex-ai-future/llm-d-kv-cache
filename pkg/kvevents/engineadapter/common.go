@@ -54,19 +54,34 @@ func getHashAsUint64(raw any) (uint64, error) {
 	case uint64:
 		return val, nil
 	case int64:
-		//nolint:gosec // int64 to uint64 conversion is safe here
+		if val < 0 {
+			return 0, fmt.Errorf("negative hash value: %d", val)
+		}
+		//nolint:gosec // int64 to uint64 conversion is safe for non-negative values
 		return uint64(val), nil
 	case int:
-		//nolint:gosec // int to uint64 conversion is safe here
+		if val < 0 {
+			return 0, fmt.Errorf("negative hash value: %d", val)
+		}
+		//nolint:gosec // int to uint64 conversion is safe for non-negative values
 		return uint64(val), nil
 	case int32:
-		//nolint:gosec // int32 to uint64 conversion is safe here
+		if val < 0 {
+			return 0, fmt.Errorf("negative hash value: %d", val)
+		}
+		//nolint:gosec // int32 to uint64 conversion is safe for non-negative values
 		return uint64(val), nil
 	case int16:
-		//nolint:gosec // int16 to uint64 conversion is safe here
+		if val < 0 {
+			return 0, fmt.Errorf("negative hash value: %d", val)
+		}
+		//nolint:gosec // int16 to uint64 conversion is safe for non-negative values
 		return uint64(val), nil
 	case int8:
-		//nolint:gosec // int8 to uint64 conversion is safe here
+		if val < 0 {
+			return 0, fmt.Errorf("negative hash value: %d", val)
+		}
+		//nolint:gosec // int8 to uint64 conversion is safe for non-negative values
 		return uint64(val), nil
 	case uint:
 		return uint64(val), nil

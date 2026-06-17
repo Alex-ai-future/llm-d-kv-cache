@@ -82,6 +82,26 @@ func TestGetHashAsUint64(t *testing.T) {
 		}
 	})
 
+	t.Run("negative_signed_integers", func(t *testing.T) {
+		tests := []struct {
+			name  string
+			input any
+		}{
+			{"int8", int8(-1)},
+			{"int16", int16(-1)},
+			{"int32", int32(-1)},
+			{"int64", int64(-1)},
+			{"int", int(-1)},
+		}
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				_, err := getHashAsUint64(tt.input)
+				require.Error(t, err)
+				assert.Contains(t, err.Error(), "negative hash value")
+			})
+		}
+	})
+
 	t.Run("bytes_8", func(t *testing.T) {
 		b := make([]byte, 8)
 		binary.BigEndian.PutUint64(b, 12345)
