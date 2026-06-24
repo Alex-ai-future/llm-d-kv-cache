@@ -14,6 +14,7 @@
 
 import os
 from collections.abc import Collection
+from typing import TYPE_CHECKING
 
 from vllm.logger import init_logger
 from vllm.v1.kv_offload.base import (
@@ -25,6 +26,11 @@ from vllm.v1.kv_offload.base import (
     RequestOffloadingContext,
     get_offload_block_hash,
 )
+
+if TYPE_CHECKING:
+    from vllm.distributed.kv_transfer.kv_connector.v1.offloading.metrics import (
+        OffloadingConnectorStats,
+    )
 from zmq import ZMQError
 
 from llmd_fs_backend.event_publisher import StorageMedium
@@ -166,6 +172,45 @@ class SharedStorageOffloadingManager(OffloadingManager):
         """
         if success:
             self._publish_blocks_stored(keys)
+
+    def get_stats(self) -> "OffloadingConnectorStats | None":
+        """Return FS-backend-specific connector stats since the last call.
+
+        Compatibility note
+        ~~~~~~~~~~~~~~~~~~
+        get_stats() exists on vLLM's OffloadingManager base class but returns
+        None by default.  When running against vLLM v0.22.0, this method
+        overrides the base class default.  The scheduler calls it every step,
+        but since we return None the scheduler skips FS-backend-specific stats
+        (generic transfer metrics are still collected automatically by vLLM's
+        worker).
+
+        This is the counterpart to
+        SharedStorageOffloadingSpec.build_metric_definitions().
+        To add FS-specific metrics:
+
+        1. Declare the metrics in build_metric_definitions() (spec.py)
+        2. Accumulate data in the manager (e.g. lookup hit/miss counters)
+        3. Return the accumulated values here as OffloadingConnectorStats
+
+        Example::
+
+            stats = OffloadingConnectorStats()
+            stats.increase_counter("vllm:kv_offload_fs_lookup_hit", self._lookup_hits)
+            self._lookup_hits = 0
+            return stats
+
+        Currently returns None because this connector has no FS-specific
+        metrics.  Generic transfer metrics (load_bytes, store_bytes, etc.)
+        are automatically collected from TransferResult by the
+        OffloadingConnectorWorker and reported by the scheduler — they do
+        NOT go through this method.
+
+        See vllm-project/vllm#44008 and vllm-project/vllm#35669.
+        """
+        # Currently no FS-backend-specific stats to report.
+        # Returning None lets the scheduler skip this manager in get_stats().
+        return None
 
     def shutdown(self) -> None:
         if self._event_publisher is not None:
