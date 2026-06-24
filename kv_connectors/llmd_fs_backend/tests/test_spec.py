@@ -151,3 +151,32 @@ def test_scheduler_config_sees_offloaded_block_size(tmp_path):
             group_config.offloaded_block_size
             == spec.gpu_blocks_per_file * group_config.gpu_block_size
         )
+
+
+def test_build_metric_definitions_returns_empty_for_fs_specific_metrics():
+    """build_metric_definitions returns an empty dict because FS backend
+    currently has no FS-specific metrics to declare.
+
+    Generic transfer metrics (load_bytes, store_bytes, load_time, store_time,
+    load_size, store_size) are already declared by vLLM's
+    get_connector_metric_definitions() and automatically collected from
+    TransferResult by the OffloadingConnectorWorker.  Re-declaring them here
+    would be redundant — they get overwritten during OffloadPromMetrics init:
+
+        self._offloading_metric_metadata = {
+            **spec_cls.build_metric_definitions(extra_config),
+            **get_connector_metric_definitions(),  # ← overwrites同名 keys
+        }
+
+    To add FS-specific metrics in the future:
+    1. Add entries to the dict returned by build_metric_definitions()
+    2. Implement SharedStorageOffloadingManager.get_stats() to return
+       actual values via OffloadingConnectorStats
+
+    See vllm-project/vllm#44008 and vllm-project/vllm#35669.
+    """
+    extra_config: dict[str, object] = {}
+    defs = SharedStorageOffloadingSpec.build_metric_definitions(extra_config)
+
+    # No FS-specific metrics currently — generic transfer metrics are handled by vLLM.
+    assert defs == {}

@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from collections.abc import Iterator
+from typing import Any
 
 from vllm.config import VllmConfig
 from vllm.v1.kv_cache_interface import KVCacheConfig
@@ -21,6 +22,7 @@ from vllm.v1.kv_offload.base import (
     GPULoadStoreSpec,
     LoadStoreSpec,
     OffloadingManager,
+    OffloadingMetricMetadata,
     OffloadingSpec,
 )
 from vllm.v1.kv_offload.worker.worker import OffloadingHandler
@@ -43,6 +45,47 @@ class SharedStorageOffloadingSpec(OffloadingSpec):
     """
     OffloadingSpec for shared storage backend (e.g., mounted NFS, PVC).
     """
+
+    @classmethod
+    def build_metric_definitions(
+        cls, extra_config: dict[str, Any]
+    ) -> dict[str, OffloadingMetricMetadata]:
+        """Return Prometheus metric definitions for FS-backend-specific metrics.
+
+        Compatibility note
+        ~~~~~~~~~~~~~~~~~~
+        build_metric_definitions() was added to vLLM's OffloadingSpec base class
+        after v0.22.0 (in PR #35669).  When running against vLLM v0.22.0, this
+        method exists but is never called by OffloadPromMetrics — it is a no-op
+        placeholder that becomes functional once the vLLM dependency is upgraded.
+
+        Architecture
+        ~~~~~~~~~~~~
+        Generic transfer metrics (load_bytes, store_bytes, load_time, store_time,
+        load_size, store_size) are already declared by vLLM's
+        get_connector_metric_definitions() and automatically collected from
+        TransferResult by the OffloadingConnectorWorker.  This connector does NOT
+        re-declare them — doing so would be redundant and gets overwritten by
+        vLLM's definitions during OffloadPromMetrics initialisation:
+
+            self._offloading_metric_metadata = {
+                **spec_cls.build_metric_definitions(extra_config),
+                **get_connector_metric_definitions(),  # overwrites same-name keys
+            }
+
+        To add FS-specific metrics (e.g. lookup_hit/miss counters, file existence
+        check stats, GDS mode metrics), add entries here AND implement
+        SharedStorageOffloadingManager.get_stats() to return the actual values
+        via OffloadingConnectorStats.
+
+        See vllm-project/vllm#44008 (KV Offloading Metrics Redesign) and
+        vllm-project/vllm#35669 (Offloading Manager Stats) for the full
+        metrics architecture.
+        """
+        # Currently no FS-backend-specific metrics.
+        # Generic transfer metrics are handled by vLLM automatically.
+        # Future FS-specific metrics should be added here.
+        return {}
 
     def __init__(self, vllm_config: VllmConfig, kv_cache_config: KVCacheConfig):
         # Hide "block_size" from the base class to bypass the uniformity
