@@ -54,10 +54,11 @@ class SharedStorageOffloadingSpec(OffloadingSpec):
 
         Compatibility note
         ~~~~~~~~~~~~~~~~~~
-        build_metric_definitions() was added to vLLM's OffloadingSpec base class
-        after v0.22.0 (in PR #35669).  When running against vLLM v0.22.0, this
-        method exists but is never called by OffloadPromMetrics — it is a no-op
-        placeholder that becomes functional once the vLLM dependency is upgraded.
+        build_metric_definitions() was added to vLLM's OffloadingSpec base
+        class after v0.23.0.  On vLLM >= that version, this method is called
+        by OffloadPromMetrics during startup to register FS-specific Prometheus
+        metrics.  Since we currently return {}, no FS-specific metrics are
+        registered — only vLLM's generic transfer metrics are active.
 
         Architecture
         ~~~~~~~~~~~~

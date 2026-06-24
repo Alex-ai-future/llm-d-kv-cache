@@ -178,12 +178,11 @@ class SharedStorageOffloadingManager(OffloadingManager):
 
         Compatibility note
         ~~~~~~~~~~~~~~~~~~
-        get_stats() exists on vLLM's OffloadingManager base class but returns
-        None by default.  When running against vLLM v0.22.0, this method
-        overrides the base class default.  The scheduler calls it every step,
-        but since we return None the scheduler skips FS-backend-specific stats
-        (generic transfer metrics are still collected automatically by vLLM's
-        worker).
+        get_stats() exists on vLLM's OffloadingManager base class and returns
+        None by default.  This method overrides that default.  The scheduler
+        calls it every step; since we return None, the scheduler skips
+        FS-backend-specific stats (generic transfer metrics are still
+        collected automatically by vLLM's worker).
 
         This is the counterpart to
         SharedStorageOffloadingSpec.build_metric_definitions().
