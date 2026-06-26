@@ -34,12 +34,13 @@ def test_multi_connector_prom_metrics_dedup():
     This is the upstream fix from vLLM PR #40010 that makes the
     llmd_fs_backend monkey-patch obsolete.
     """
-    vllm = pytest.importorskip("vllm")
+    pytest.importorskip("vllm")
+
+    import inspect
 
     from vllm.distributed.kv_transfer.kv_connector.v1.multi_connector import (
         MultiConnector,
     )
-    import inspect
 
     src = inspect.getsource(MultiConnector.build_prom_metrics)
 
