@@ -39,6 +39,10 @@ test:
 test-performance:
 	pytest ./tests/performance/ -v -sq
 
+# Run CPU-safe tests (no GPU required)
+test-cpu:
+	pytest ./tests/cpu/ -v
+
 # Clean local build artifacts
 clean:
 	rm -rf build dist *.egg-info $(WHEEL_DIR)

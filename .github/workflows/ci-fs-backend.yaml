@@ -1,0 +1,25 @@
+name: CI - FS Backend Test
+
+on:
+  pull_request:
+    paths:
+      - 'kv_connectors/llmd_fs_backend/**'
+  push:
+    branches:
+      - main
+    paths:
+      - 'kv_connectors/llmd_fs_backend/**'
+
+jobs:
+  cpu-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: kv_connectors/llmd_fs_backend
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pytest msgpack pyzmq
+      - run: pytest tests/cpu/ -v
