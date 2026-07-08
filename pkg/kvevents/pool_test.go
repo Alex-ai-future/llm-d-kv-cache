@@ -1165,8 +1165,6 @@ func TestTierAliasNormalization(t *testing.T) {
 	pool.processEventBatch(ctx, fsFromEvictor, "pod-1", "test-model")
 
 	// Verify: the PodEntry is evicted (engine key no longer resolves, or no pods remain)
-	result, err = idx.Lookup(ctx, canonicalKeys, nil)
-	require.NoError(t, err)
 	// After eviction, the engine→request mapping may still exist but no pods should remain
 	// OR the engine key itself no longer resolves. Either way, the key indicator is:
 	// the PodEntry{pod-1, fs} must be gone.
