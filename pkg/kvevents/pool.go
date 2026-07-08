@@ -53,17 +53,6 @@ func normalizeDeviceTier(deviceTier string) string {
 	return strings.ToLower(deviceTier)
 }
 
-// normalizeTier applies the Pool's tier alias mapping to a device tier string.
-// It first lowercases the tier, defaults empty to the GPU source tier, then
-// looks up any configured alias.
-func (p *Pool) normalizeTier(deviceTier string) string {
-	tier := normalizeDeviceTier(deviceTier) // handles empty → "gpu" and lowercase
-	if canonical, ok := p.tierAliases[tier]; ok {
-		return canonical
-	}
-	return tier
-}
-
 // Config holds the configuration for the event processing pool.
 type Config struct {
 	// ZMQEndpoint is the ZMQ address to connect to (e.g., "tcp://indexer:5557").
@@ -181,6 +170,17 @@ func NewPool(cfg *Config, index kvblock.Index, tokenProcessor kvblock.TokenProce
 // GroupCatalog returns the KV cache group metadata learned from events.
 func (p *Pool) GroupCatalog() *kvblock.GroupCatalog {
 	return p.groupCatalog
+}
+
+// normalizeTier applies the Pool's tier alias mapping to a device tier string.
+// It first lowercases the tier, defaults empty to the GPU source tier, then
+// looks up any configured alias.
+func (p *Pool) normalizeTier(deviceTier string) string {
+	tier := normalizeDeviceTier(deviceTier) // handles empty → "gpu" and lowercase
+	if canonical, ok := p.tierAliases[tier]; ok {
+		return canonical
+	}
+	return tier
 }
 
 // Start begins the worker pool.
