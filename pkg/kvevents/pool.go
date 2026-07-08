@@ -140,13 +140,17 @@ func NewPool(cfg *Config, index kvblock.Index, tokenProcessor kvblock.TokenProce
 		cfg = DefaultConfig()
 	}
 
-	// Build tier aliases: start with defaults, then merge user-provided overrides
+	// Build tier aliases: start with defaults, then merge user-provided overrides.
+	// Keys and values are lowercased so normalizeTier can match regardless of
+	// how the user writes them in config.
 	tierAliases := make(map[string]string)
 	for k, v := range defaultTierAliases {
 		tierAliases[k] = v
 	}
 	for k, v := range cfg.TierAliases {
-		tierAliases[k] = v
+		if k != "" && v != "" {
+			tierAliases[strings.ToLower(k)] = strings.ToLower(v)
+		}
 	}
 
 	p := &Pool{

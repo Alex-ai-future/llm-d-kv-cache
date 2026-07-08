@@ -1184,10 +1184,9 @@ func TestTierAliasNormalization(t *testing.T) {
 
 // TestNormalizeTierMethod verifies the normalizeTier method applies aliases correctly.
 func TestNormalizeTierMethod(t *testing.T) {
-	cfg := &Config{
-		TierAliases: map[string]string{
-			"custom_tier": "fs",
-		},
+	cfg := DefaultConfig()
+	cfg.TierAliases = map[string]string{
+		"custom_tier": "fs",
 	}
 
 	idx, err := kvblock.NewInMemoryIndex(kvblock.DefaultInMemoryIndexConfig())
@@ -1214,6 +1213,7 @@ func TestNormalizeTierMethod(t *testing.T) {
 		{"GPU", "gpu"}, // No alias, just lowercase
 		{"custom_tier", "fs"},
 		{"CUSTOM_TIER", "fs"}, // lowercase → "custom_tier" → alias → "fs"
+		{"Custom_Tier", "fs"}, // mixed case also normalized
 	}
 
 	for _, tc := range testCases {
